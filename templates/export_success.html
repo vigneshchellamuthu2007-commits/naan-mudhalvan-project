@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Export Successful – ComicCraft</title>
+  <meta name="description" content="Your ComicCraft comic has been exported successfully as a PDF." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <div class="bg-particles" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="logo logo--link" aria-label="Go home">
+        <span class="logo-icon">🎨</span>
+        <span class="logo-text">ComicCraft</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container export-success-page">
+    <div class="success-card">
+      <div class="success-icon-wrap">
+        <div class="success-icon">✅</div>
+        <div class="success-icon-ring"></div>
+      </div>
+
+      <h1 class="success-title">PDF Exported Successfully!</h1>
+      <p class="success-subtitle">
+        Your comic PDF has been generated and is ready to download.
+      </p>
+
+      {% if pdf_path %}
+      <div class="success-file">
+        <span class="success-file__icon">📄</span>
+        <span class="success-file__name">{{ pdf_path.split('/')[-1] }}</span>
+      </div>
+
+      <div class="success-actions">
+        <a href="{{ pdf_path }}" download class="btn btn--primary btn--large">
+          <span>⬇️</span> Download PDF
+        </a>
+      </div>
+      {% endif %}
+
+      <div class="success-actions">
+        <a href="/" class="btn btn--outline btn--large">
+          <span>✨</span> Create Another Comic
+        </a>
+      </div>
+
+      <!-- Fun tips -->
+      <div class="success-tips">
+        <h3>🌟 What's next?</h3>
+        <ul>
+          <li>Share your comic with friends and family</li>
+          <li>Print it out and display it on your wall</li>
+          <li>Create a sequel with "Create Another Comic"</li>
+          <li>Try a different art style for a fresh look</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built with ❤️ using <strong>FastAPI</strong>, <strong>Google Gemini</strong> &amp; <strong>Stable Diffusion</strong></p>
+  </footer>
+
+  <script src="/static/js/script.js"></script>
+</body>
+</html>

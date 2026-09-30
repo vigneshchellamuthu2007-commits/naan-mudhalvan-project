@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Comic is Ready! – ComicCraft</title>
+  <meta name="description" content="Preview your AI-generated 5-panel comic story and download it as a PDF." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="preview-page">
+
+  <!-- ── BACKGROUND ────────────────────────────────────────────────── -->
+  <div class="bg-particles" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- ── HEADER ───────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="logo logo--link" aria-label="Go to ComicCraft home">
+        <span class="logo-icon">🎨</span>
+        <span class="logo-text">ComicCraft</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ── SUCCESS BANNER ───────────────────────────────────────────── -->
+  <section class="preview-hero">
+    <div class="confetti-row" aria-hidden="true">🎉 🎊 ✨ 🌟 🎉 🎊 ✨ 🌟 🎉 🎊</div>
+    <h1 class="preview-hero__title">Your Comic is Ready! 🎉</h1>
+    <p class="preview-hero__subtitle">
+      <strong>{{ story_title }}</strong>
+    </p>
+    <div class="preview-meta">
+      <span class="meta-badge">🦸 {{ character_name }}</span>
+      <span class="meta-badge">🌍 {{ setting }}</span>
+      <span class="meta-badge">🎭 {{ tone }}</span>
+      <span class="meta-badge">🎨 {{ art_style }}</span>
+    </div>
+
+    {% if image_warnings and image_warnings > 0 %}
+    <div class="warning-banner" role="alert">
+      <span class="warning-icon">⚠️</span>
+      <span>
+        {{ image_warnings }} panel(s) used placeholder images because AI image generation was unavailable.
+        Add your <code>HF_API_KEY</code> in <code>.env</code> for real artwork.
+      </span>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ── ACTION BUTTONS ───────────────────────────────────────────── -->
+  <div class="preview-actions container">
+    <a id="downloadPdfBtn" href="{{ pdf_path }}" download class="btn btn--primary btn--large">
+      <span>📥</span> Download Comic as PDF
+    </a>
+    <a href="/" class="btn btn--outline btn--large">
+      <span>✨</span> Create Another Comic
+    </a>
+  </div>
+
+  <!-- ── COMIC PANELS ──────────────────────────────────────────────── -->
+  <main class="container" id="comicPanels">
+    {% for panel in panels %}
+    <article class="panel-card" id="panel-{{ panel.panel_number }}">
+
+      <!-- Panel header -->
+      <div class="panel-header">
+        <div class="panel-number" aria-label="Panel {{ panel.panel_number }}">
+          {{ panel.panel_number }}
+        </div>
+        <div class="panel-header__info">
+          <h2 class="panel-title">{{ panel.title }}</h2>
+          {% if panel.image_method == "placeholder" %}
+          <span class="image-badge image-badge--placeholder">🎨 Placeholder</span>
+          {% elif panel.image_method == "hf_api" %}
+          <span class="image-badge image-badge--ai">🤖 AI Generated</span>
+          {% elif panel.image_method == "local_sd" %}
+          <span class="image-badge image-badge--local">💻 Local SD</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Panel image -->
+      <div class="panel-image-wrapper">
+        <img
+          src="{{ panel.image_path }}"
+          alt="Comic panel {{ panel.panel_number }}: {{ panel.title }}"
+          class="panel-image"
+          loading="lazy"
+        />
+        {% if panel.image_method == "placeholder" %}
+        <div class="panel-image__overlay">
+          <span>🖼️ AI Image Unavailable</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Caption box -->
+      {% if panel.caption %}
+      <div class="caption-box">
+        <span class="caption-label">CAPTION</span>
+        <p class="caption-text">{{ panel.caption }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Scene description -->
+      <div class="panel-section">
+        <h3 class="panel-section__title">
+          <span class="section-icon">🎬</span> Scene
+        </h3>
+        <p class="panel-scene">{{ panel.scene_description }}</p>
+      </div>
+
+      <!-- Narration -->
+      {% if panel.narration %}
+      <div class="panel-section">
+        <h3 class="panel-section__title">
+          <span class="section-icon">📖</span> Narration
+        </h3>
+        <p class="panel-narration">{{ panel.narration }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Dialogue speech bubbles -->
+      {% if panel.dialogue %}
+      <div class="panel-section">
+        <h3 class="panel-section__title">
+          <span class="section-icon">💬</span> Dialogue
+        </h3>
+        <div class="dialogue-bubbles">
+          {% for bubble in panel.dialogue %}
+          <div class="speech-bubble {% if loop.index is even %}speech-bubble--right{% endif %}">
+            <div class="speech-bubble__speaker">{{ bubble.speaker }}</div>
+            <div class="speech-bubble__text">{{ bubble.text }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </article>
+    {% endfor %}
+
+    <!-- ── Bottom action buttons ─────────────────────────────────── -->
+    <div class="preview-actions preview-actions--bottom">
+      <a href="{{ pdf_path }}" download class="btn btn--primary btn--large">
+        <span>📥</span> Download Comic as PDF
+      </a>
+      <a href="/" class="btn btn--outline btn--large">
+        <span>✨</span> Create Another Comic
+      </a>
+    </div>
+  </main>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <p>Built with ❤️ using <strong>FastAPI</strong>, <strong>Google Gemini</strong> &amp; <strong>Stable Diffusion</strong></p>
+    <p class="footer-links">
+      <a href="/docs" target="_blank">API Docs</a> •
+      <a href="/" >Create Another Comic</a>
+    </p>
+  </footer>
+
+  <script src="/static/js/script.js"></script>
+</body>
+</html>

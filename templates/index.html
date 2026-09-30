@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ComicCraft – AI Comic Story Creator</title>
+  <meta name="description" content="Turn your imagination into a 5-panel AI-powered comic story with ComicCraft. Enter your story idea and get a full comic with images, dialogue, and PDF export." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- ── PARTICLES / BACKGROUND DOTS ─────────────────────────────── -->
+  <div class="bg-particles" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- ── HEADER ───────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🎨</span>
+        <span class="logo-text">ComicCraft</span>
+      </div>
+      <p class="logo-tagline">Turn your imagination into an AI-powered comic.</p>
+    </div>
+  </header>
+
+  <!-- ── HERO ─────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-badge">✨ Powered by Google Gemini + Stable Diffusion</div>
+    <h1 class="hero-title">Create Your Own<br /><span class="gradient-text">AI Comic Strip</span></h1>
+    <p class="hero-subtitle">
+      Describe your story idea and our AI will craft a stunning 5-panel comic complete with
+      artwork, narration, character dialogue, and a downloadable PDF.
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">5</span><span class="stat-label">Panels</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">AI</span><span class="stat-label">Generated</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">PDF</span><span class="stat-label">Export</span></div>
+    </div>
+  </section>
+
+  <!-- ── ERROR MESSAGES ───────────────────────────────────────────── -->
+  {% if errors %}
+  <div class="container">
+    <div class="error-box" role="alert" aria-live="assertive">
+      <div class="error-box__icon">⚠️</div>
+      <div class="error-box__content">
+        <h3>Please fix the following issues:</h3>
+        <ul>
+          {% for err in errors %}
+          <li>{{ err }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── MAIN FORM ─────────────────────────────────────────────────── -->
+  <main class="container" id="create-form">
+    <div class="form-card">
+      <div class="form-card__header">
+        <h2 class="form-card__title">
+          <span class="form-card__icon">🖊️</span>
+          Craft Your Comic
+        </h2>
+        <p class="form-card__subtitle">Fill in the details below and let the AI do the rest.</p>
+      </div>
+
+      <form
+        id="comicForm"
+        method="POST"
+        action="/generate"
+        class="comic-form"
+        novalidate
+      >
+        <!-- Story Prompt -->
+        <div class="form-group form-group--full">
+          <label for="story_prompt" class="form-label">
+            <span class="label-icon">📖</span> Story Prompt
+            <span class="label-required">*</span>
+          </label>
+          <textarea
+            id="story_prompt"
+            name="story_prompt"
+            class="form-textarea"
+            placeholder="A young girl discovers a magical map in her school library that leads to a hidden world beneath the city..."
+            rows="4"
+            required
+            minlength="10"
+            maxlength="2000"
+          >{{ form_data.story_prompt if form_data else '' }}</textarea>
+          <span class="form-hint">Minimum 10 characters. Be creative and descriptive!</span>
+        </div>
+
+        <!-- Character Name -->
+        <div class="form-group">
+          <label for="character_name" class="form-label">
+            <span class="label-icon">🦸</span> Main Character
+            <span class="label-required">*</span>
+          </label>
+          <input
+            type="text"
+            id="character_name"
+            name="character_name"
+            class="form-input"
+            placeholder="e.g. Maya, Zephyr, Captain Nova..."
+            required
+            maxlength="100"
+            value="{{ form_data.character_name if form_data else '' }}"
+          />
+        </div>
+
+        <!-- Setting -->
+        <div class="form-group">
+          <label for="setting" class="form-label">
+            <span class="label-icon">🌍</span> Setting
+          </label>
+          <div class="select-wrapper">
+            <select id="setting" name="setting" class="form-select" required>
+              {% set settings = ["School", "Forest", "City", "Space", "Village", "Fantasy World"] %}
+              {% for s in settings %}
+              <option value="{{ s }}" {% if form_data and form_data.setting == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+
+        <!-- Story Tone -->
+        <div class="form-group">
+          <label for="tone" class="form-label">
+            <span class="label-icon">🎭</span> Story Tone
+          </label>
+          <div class="select-wrapper">
+            <select id="tone" name="tone" class="form-select" required>
+              {% set tones = ["Funny", "Dramatic", "Adventure", "Light-hearted", "Emotional", "Mystery"] %}
+              {% for t in tones %}
+              <option value="{{ t }}" {% if form_data and form_data.tone == t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+
+        <!-- Art Style -->
+        <div class="form-group form-group--full">
+          <label class="form-label">
+            <span class="label-icon">🎨</span> Art Style
+          </label>
+          <div class="style-grid" id="artStyleGrid">
+            {% set styles = [
+              ("Anime",      "⛩️"),
+              ("Comic Book", "💥"),
+              ("Pixel Art",  "👾"),
+              ("Cartoon",    "🐣"),
+              ("Realistic",  "📷"),
+              ("Fantasy",    "🔮"),
+            ] %}
+            {% for style, icon in styles %}
+            <label class="style-card" for="style_{{ loop.index }}">
+              <input
+                type="radio"
+                id="style_{{ loop.index }}"
+                name="art_style"
+                value="{{ style }}"
+                class="style-radio"
+                {% if (form_data and form_data.art_style == style) or (not form_data and loop.index == 1) %}checked{% endif %}
+              />
+              <span class="style-card__icon">{{ icon }}</span>
+              <span class="style-card__name">{{ style }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="art_style" id="art_style_hidden" value="{{ form_data.art_style if form_data else 'Anime' }}" />
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-group form-group--full form-group--center">
+          <button type="submit" id="generateBtn" class="btn btn--primary btn--large">
+            <span class="btn__icon">✨</span>
+            <span class="btn__text">Generate My Comic</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- How it works section -->
+    <div class="how-it-works">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-icon">✍️</div>
+          <h3>Describe Your Story</h3>
+          <p>Enter your story idea, character, setting, and preferred tone.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-icon">🤖</div>
+          <h3>AI Generates Content</h3>
+          <p>Gemini crafts a 5-panel outline, dialogue, narration, and captions.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-icon">🖼️</div>
+          <h3>Artwork Is Created</h3>
+          <p>Stable Diffusion generates unique comic panel images for each scene.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-icon">📥</div>
+          <h3>Download Your Comic</h3>
+          <p>Preview all panels online and download a beautiful PDF to keep.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── LOADING OVERLAY ───────────────────────────────────────────── -->
+  <div id="loadingOverlay" class="loading-overlay" aria-hidden="true" role="status">
+    <div class="loading-card">
+      <div class="loading-spinner" aria-hidden="true">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring spinner-ring--2"></div>
+        <div class="spinner-ring spinner-ring--3"></div>
+      </div>
+      <h2 class="loading-title">Creating Your Comic</h2>
+      <p id="loadingMessage" class="loading-message">Initialising AI pipeline...</p>
+      <div class="loading-steps">
+        <div class="loading-step" id="lstep1">📖 Writing the story outline...</div>
+        <div class="loading-step" id="lstep2">💬 Generating dialogue & narration...</div>
+        <div class="loading-step" id="lstep3">🖼️ Creating comic panel images...</div>
+        <div class="loading-step" id="lstep4">📄 Preparing your masterpiece...</div>
+      </div>
+      <p class="loading-note">This may take 30–90 seconds depending on your hardware.</p>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <p>Built with ❤️ using <strong>FastAPI</strong>, <strong>Google Gemini</strong> &amp; <strong>Stable Diffusion</strong></p>
+    <p class="footer-links">
+      <a href="/docs" target="_blank">API Docs</a> •
+      <a href="/health" target="_blank">Health Check</a> •
+      <a href="/test-image" target="_blank">Test Image</a>
+    </p>
+  </footer>
+
+  <script src="/static/js/script.js"></script>
+</body>
+</html>
