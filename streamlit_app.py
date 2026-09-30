@@ -79,40 +79,53 @@ st.markdown("""
 # ─── Secret / API Key Management ─────────────────────────────────────
 # Check Streamlit secrets first, then environment variables
 gemini_key = None
-if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
-    gemini_key = st.secrets["GEMINI_API_KEY"]
-elif os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_API_KEY") != "your_gemini_api_key_here":
+try:
+    if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+        gemini_key = st.secrets["GEMINI_API_KEY"]
+except Exception:
+    pass
+
+if not gemini_key and os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_API_KEY") != "your_gemini_api_key_here":
     gemini_key = os.getenv("GEMINI_API_KEY")
 
+if gemini_key:
+    os.environ["GEMINI_API_KEY"] = gemini_key
+
 hf_key = None
-if hasattr(st, "secrets") and "HF_API_KEY" in st.secrets:
-    hf_key = st.secrets["HF_API_KEY"]
-elif os.getenv("HF_API_KEY") and os.getenv("HF_API_KEY") != "your_huggingface_api_key_here":
+try:
+    if hasattr(st, "secrets") and "HF_API_KEY" in st.secrets:
+        hf_key = st.secrets["HF_API_KEY"]
+except Exception:
+    pass
+
+if not hf_key and os.getenv("HF_API_KEY") and os.getenv("HF_API_KEY") != "your_huggingface_api_key_here":
     hf_key = os.getenv("HF_API_KEY")
+
+if hf_key:
+    os.environ["HF_API_KEY"] = hf_key
 
 # ─── Sidebar Configuration ───────────────────────────────────────────
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/000000/comic-book.png", width=70)
-    st.title("ComicCraft Settings")
+    st.title("ComicCraft")
     
-    st.markdown("### 🔑 API Keys")
-    user_gemini_key = st.text_input(
-        "Google Gemini API Key",
-        value=gemini_key if gemini_key else "",
-        type="password",
-        help="Get your free key from https://aistudio.google.com/app/apikey"
-    )
-    if user_gemini_key:
-        os.environ["GEMINI_API_KEY"] = user_gemini_key
-    
-    user_hf_key = st.text_input(
-        "Hugging Face Token (Optional)",
-        value=hf_key if hf_key else "",
-        type="password",
-        help="Optional: For cloud AI image generation from https://huggingface.co/settings/tokens"
-    )
-    if user_hf_key:
-        os.environ["HF_API_KEY"] = user_hf_key
+    st.markdown("### ⚡ System Status")
+    is_gemini_ready = bool(os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_API_KEY") != "your_gemini_api_key_here")
+    if is_gemini_ready:
+        st.success("🟢 **Gemini AI:** Connected (Default)")
+    else:
+        st.warning("⚠️ **Gemini AI:** Add key in Settings ➔ Secrets")
+
+    with st.expander("⚙️ Custom API Key (Optional)"):
+        custom_gemini_key = st.text_input(
+            "Override Gemini API Key",
+            value="",
+            type="password",
+            help="Leave blank to use default system key"
+        )
+        if custom_gemini_key:
+            os.environ["GEMINI_API_KEY"] = custom_gemini_key
+
 
     st.markdown("---")
     st.markdown("### ℹ️ About Project")
